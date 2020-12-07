@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Liste Items</title>
+	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+
+
+	</head>
+<body>
+
+
+
+
+    <div class="container-fluid" style="padding-top: 12px;overflow-y: scroll;"> 
+        
+        <div class="row" >
+<div class="col-4">
+    Liste : 
+    <select class="custom-select" id="liste" onchange="showFiltreItems()"> 
+        <option value=""></option>
+      </select>
+</div>
+
+          </div> 
+          <br>
+          <div class="row" id="items">
+
+
+        </div> 
+
+
+</div>
+<script>
+     var data; 
+    function showSujets()
+    {
+        var tab=[];
+        let url ='https://polemika.univ-paris8.fr/omk/api/items?item_set_id=2';
+         
+    var q = d3.queue()
+        .defer(d3.json, url)
+        .awaitAll(function(error, results) {
+            if (error) throw error;
+            data=results;
+            var liste= d3.select('#liste')
+        .data(data);
+        
+        data[0].forEach(function(d, j){
+if(!tab.includes(d['dcterms:subject'][0]['@value']))
+{
+    tab.push(d['dcterms:subject'][0]['@value']);
+    liste.append('option')
+    .attr('value',d['dcterms:subject'][0]['@value'])
+    .text(d['dcterms:subject'][0]['@value']);
+}
+               
+
+            });
+
+
+        });
+    }
+    function showFiltreItems()
+    {
+var liste=document.getElementById('liste');
+new_data=data[0].filter(function(d){return d['dcterms:subject'][0]['@value'] == liste.value;});
+         
+console.log(new_data);
+
+showItems(new_data);
+
+
+    }
+
+    function showItems(data)
+    {
+
+
+document.getElementById('items').innerHTML="";
+        var infoItems= d3.select('#items')
+        .data(data);
+        
+        data.forEach(function(d, j){
+            console.log(d["o:id"]);
+            infoItems.append('div').attr('class','col-2');
+          var card=  infoItems
+            .append('div').attr('class','col-8 ')
+            .style('text-align','center')
+            .style('margin-bottom','10px')
+            .append('div').attr('class','card shadow-none p-3 mb-5 bg-light rounded')
+            card.append('div').attr('class','card-header')
+        .append('h3').text('Identifiant : '+d["o:id"]); 
+
+d3.queue()
+        .defer(d3.json, d["o:media"][0]['@id'])
+        .awaitAll(function(error, results) {
+            if (error) throw error;
+            csv_data=results;
+            
+           var body=card.append('div').attr('class','card-body');
+           body .append('h4').attr('class','card-title')
+        .text(d["o:title"]);
+        body .append("img")
+        .attr('src', csv_data[0]['o:thumbnail_urls']['large']);
+            
+        });
+
+
+
+        infoItems.append('div').attr('class','col-2');
+        });
+        
+
+
+
+    }
+
+
+
+showSujets();
+</script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+</body>
+</html>
